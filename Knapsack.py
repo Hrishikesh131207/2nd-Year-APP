@@ -1,59 +1,64 @@
-def bottom_up_knapsack(wt, val, limit):
-    n = len(wt)
-    table = [[0] * (limit + 1) for _ in range(n + 1)]
+def knapsack_bottom_up(weights, values, capacity):
+    n = len(weights)
+    dp = [[0 for _ in range(capacity + 1)] for _ in range(n + 1)]
 
     for i in range(1, n + 1):
-        for c in range(1, limit + 1):
-            if wt[i - 1] <= c:
-                take = val[i - 1] + table[i - 1][c - wt[i - 1]]
-                skip = table[i - 1][c]
-                table[i][c] = max(take, skip)
+        for w in range(1, capacity + 1):
+            if weights[i - 1] <= w:
+                dp[i][w] = max(
+                    values[i - 1] + dp[i - 1][w - weights[i - 1]],
+                    dp[i - 1][w]
+                )
             else:
-                table[i][c] = table[i - 1][c]
+                dp[i][w] = dp[i - 1][w]
 
-    chosen = []
-    c = limit
+    selected_items = []
+    w = capacity
 
     for i in range(n, 0, -1):
-        if table[i][c] > table[i - 1][c]:
-            chosen.append(i)
-            c -= wt[i - 1]
+        if dp[i][w] != dp[i - 1][w]:
+            selected_items.append(i)
+            w = w - weights[i - 1]
 
-    chosen.reverse()
-    return table[n][limit], chosen
+    selected_items.reverse()
+    return dp[n][capacity], selected_items, dp
 
 
-def top_down_knapsack(wt, val, limit):
-    n = len(wt)
-    memo = [[None] * (limit + 1) for _ in range(n + 1)]
+def knapsack_top_down(weights, values, capacity):
+    n = len(weights)
+    memo = [[-1 for _ in range(capacity + 1)] for _ in range(n + 1)]
 
-    def solve(i, c):
-        if i == 0 or c == 0:
+    def solve(i, w):
+        if i == 0 or w == 0:
             return 0
 
-        if memo[i][c] is not None:
-            return memo[i][c]
+        if memo[i][w] != -1:
+            return memo[i][w]
 
-        if wt[i - 1] > c:
-            memo[i][c] = solve(i - 1, c)
+        if weights[i - 1] > w:
+            memo[i][w] = solve(i - 1, w)
         else:
-            take = val[i - 1] + solve(i - 1, c - wt[i - 1])
-            skip = solve(i - 1, c)
-            memo[i][c] = max(take, skip)
+            include = values[i - 1] + solve(
+                i - 1,
+                w - weights[i - 1]
+            )
+            exclude = solve(i - 1, w)
+            memo[i][w] = max(include, exclude)
 
-        return memo[i][c]
+        return memo[i][w]
 
-    result = solve(n, limit)
-    chosen = []
-    c = limit
+    maximum_value = solve(n, capacity)
+
+    selected_items = []
+    w = capacity
 
     for i in range(n, 0, -1):
-        if solve(i, c) != solve(i - 1, c):
-            chosen.append(i)
-            c -= wt[i - 1]
+        if solve(i, w) != solve(i - 1, w):
+            selected_items.append(i)
+            w = w - weights[i - 1]
 
-    chosen.reverse()
-    return result, chosen
+    selected_items.reverse()
+    return maximum_value, selected_items
 
 
 weights = [2, 1, 3, 2]
@@ -61,21 +66,29 @@ values = [12, 10, 20, 15]
 capacity = 5
 
 print("0/1 KNAPSACK PROBLEM")
-print("====================")
+print("--------------------")
+print("\nItems:")
 
 for i in range(len(weights)):
-    print("Item", i + 1, ": Weight =", weights[i], "Value =", values[i])
+    print(
+        f"Item {i + 1}: Weight = {weights[i]}, "
+        f"Value = {values[i]}"
+    )
 
-print("Capacity:", capacity)
+print("\nKnapsack Capacity:", capacity)
 
-value1, items1 = bottom_up_knapsack(weights, values, capacity)
+value1, items1, dp_table = knapsack_bottom_up(
+    weights, values, capacity
+)
 
-print("\nBottom-Up Approach")
+print("\n--- Bottom-Up Approach ---")
 print("Maximum Value:", value1)
 print("Selected Items:", items1)
 
-value2, items2 = top_down_knapsack(weights, values, capacity)
+value2, items2 = knapsack_top_down(
+    weights, values, capacity
+)
 
-print("\nTop-Down Approach")
+print("\n--- Top-Down Approach ---")
 print("Maximum Value:", value2)
 print("Selected Items:", items2)
