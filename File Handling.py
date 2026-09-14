@@ -1,45 +1,14 @@
-file_name = "1st.txt"
+# Open the input file and read all lines
+with open("file.txt", "r") as f:
+    data = f.readlines()
 
-f = open(file_name, "w")
-f.write("This is the first line.\n")
-f.write("This is the second line.\n")
-f.close()
+print("Number of lines:", len(data))
 
-print("File created and data written.\n")
+# Get the first two lines
+selected_lines = data[:2]
 
-f = open(file_name, "r")
-data = f.read()
-f.close()
+# Save them into the output file
+with open("output.txt", "w") as f:
+    f.writelines(selected_lines)
 
-print("File contents:\n")
-print(data)
-
-f = open(file_name, "a")
-f.write("This line is added later.\n")
-f.close()
-
-print("New data added.\n")
-
-f = open(file_name, "r")
-data = f.read()
-f.close()
-
-print("Updated file contents:\n")
-print(data)
-
-# OUTPUT:
-
-# File created and data written.
-
-# File contents:
-
-# This is the first line.
-# This is the second line.
-
-# New data added.
-
-# Updated file contents:
-
-# This is the first line.
-# This is the second line.
-# This line is added later.
+print("First two lines saved successfully")
